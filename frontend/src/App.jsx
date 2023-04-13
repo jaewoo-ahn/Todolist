@@ -1,51 +1,59 @@
+import {useEffect, useState} from "react";
 import axios from "axios";
 import TodoCard from "./components/TodoCard";
-import {useEffect} from "react";
+import CreateToDo from "./components/CreateTodo";
 
 function App() {
-  const getTodoList = async () => {
+  const [toDoList, setToDoList] = useState();
+
+  const getToDoList = async () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/todo`
       );
 
-      console.log(response);
+      if (response.status !== 200) {
+        alert("에러 발생!");
+        return;
+      }
+
+      setToDoList(response.data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
   useEffect(() => {
-    getTodoList();
+    getToDoList();
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col justify-start items-center pt-16">
-      <h1 className="font-bold text-4xl">AWESOME TO DO LIST 🥰 </h1>
+      <h1 className="text-4xl font-bold">AWESOME TO DO LIST :sunglasses:</h1>
       <div>
         <div className="mt-8 text-sm font-semibold">
-          Give me six hours to chop down a tree and I will spend the first four
-          sharpening the axe. Abraham Lincoln
+          If I only had an hour to chop down a tree, I would spend the first 45
+          minutes sharpening my axe, Abrabam Lincoln
         </div>
         <div className="text-xs">
-          나에게 나무를 자를 여섯 시간을 준다면, 나는 먼저 네 시간을 도끼를
-          날카롭게 하는 데에 쓰겠다. 에이브러햄 링컨
+          나무 베는데 한 시간이 주어진다면, 도끼를 가는데 45분을 쓰겠다,
+          에비브러햄 링컨
         </div>
-        <form className="flex mt-2">
-          <input
-            type="text"
-            className="grow border-2 border-pink-200 rounded-lg focus:outline-pink-400 px-2 py-1 text-lg"
-          />
-          <input
-            type="submit"
-            value="새 투두 생성"
-            className="ml-4 px-2 py-1 bg-pink-200 hover:bg-pink-400 rounded-lg text-gray-50"
-          />
-        </form>
-        <ul className="mt-16 flex flex-col w-1/2">
-          <TodoCard title="🤌 빨래하기" />
-          <TodoCard title="👈 운동하기" />
-        </ul>
+        <CreateToDo getToDoList={getToDoList} />
+      </div>
+      <div className="mt-16 flex flex-col w-1/2">
+        {toDoList
+          ? toDoList.map((v, i) => {
+              return (
+                <TodoCard
+                  key={i}
+                  title={v.title}
+                  index={i}
+                  getToDoList={getToDoList}
+                />
+              );
+            })
+          : "로딩중입니다..."}
       </div>
     </div>
   );
